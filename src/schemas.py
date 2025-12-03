@@ -1,10 +1,13 @@
-from pydantic import BaseModel, Field
+from datetime import datetime
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class PromtSchema(BaseModel):
     id: int
-    asnwer: str
+    response: str
+    created_at: datetime
 
+    model_config = ConfigDict(from_attributes=True)
 
 class CreatePromtSchema(BaseModel):
     promt: str = Field(

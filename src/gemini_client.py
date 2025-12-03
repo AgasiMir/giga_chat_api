@@ -1,7 +1,12 @@
-from src.main_config import config
+from environs import Env
 from google import genai
 
-client: genai.Client = genai.Client(api_key=config.gimini_api_key)
+env = Env()
+env.read_env(".env")
+
+key = env("GEMINI_API_KEY")
+
+client: genai.Client = genai.Client(api_key=key)
 
 
 def get_answer_from_gemini(promt: str):
