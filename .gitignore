@@ -1,0 +1,25 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Logs
+*.log
+logs/
+log/
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv
+venv/
+env/
+
+old_matrix.txt
+old_get_matrix.txt

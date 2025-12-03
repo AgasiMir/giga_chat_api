@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:17
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "6432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fast_ai_app_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  fast_ai_app_network:
+    driver: bridge
