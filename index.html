@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерфейс для нейросети</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .history {
+            margin-top: 30px;
+        }
+        .conversation-preview {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .conversation-preview:hover {
+            background-color: #f0f0f0;
+        }
+        .conversation-preview .prompt-preview {
+            font-weight: bold;
+            color: #333;
+        }
+        .conversation-preview .response-preview {
+            color: #666;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+        .conversation-full {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196F3;
+        }
+        .ai-message {
+            background-color: #f1f8e9;
+            border-left: 4px solid #4CAF50;
+        }
+        .bold-text {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        .close-btn {
+            background-color: #f44336;
+            color: white;
+            float: right;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        .close-btn:hover {
+            background-color: #d32f2f;
+        }
+        .math-expression {
+            font-family: 'Courier New', monospace;
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Интерфейс для взаимодействия с нейросетью</h1>
+        <textarea id="prompt" placeholder="Введите ваш запрос здесь..."></textarea>
+        <button onclick="sendRequest()">Отправить запрос</button>
+        
+        <div id="loading" class="loading" style="display: none;">Обработка запроса...</div>
+        
+        <div class="history">
+            <h2>История запросов</h2>
+            <div id="history"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+        
+        async function sendRequest() {
+            const prompt = document.getElementById('prompt').value;
+            if (!prompt.trim()) {
+                alert('Пожалуйста, введите запрос');
+                return;
+            }
+            
+            // Показываем индикатор загрузки
+            document.getElementById('loading').style.display = 'block';
+            
+            try {
+                // Отправляем запрос к API
+                const response = await fetch(`${API_BASE_URL}/requests/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+                
+                if (response.ok) {
+                    // После успешного запроса загружаем историю
+                    loadHistory();
+                    // Очищаем поле ввода
+                    document.getElementById('prompt').value = '';
+                } else {
+                    alert('Ошибка при отправке запроса');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при отправке запроса');
+            } finally {
+                // Скрываем индикатор загрузки
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        async function loadHistory() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/requests/`);
+                const requests = await response.json();
+                
+                const historyDiv = document.getElementById('history');
+                historyDiv.innerHTML = '';
+                
+                // Отображаем запросы в обратном порядке (новые сверху)
+                requests.reverse().forEach(request => {
+                    // Создаем превью диалога
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'conversation-preview';
+                    previewDiv.onclick = () => showFullConversation(request);
+                    
+                    // Создаем сокращенный текст запроса (первые 50 символов)
+                    const promptPreview = request.prompt.length > 50 ? 
+                        request.prompt.substring(0, 50) + '...' : request.prompt;
+                    
+                    // Создаем сокращенный текст ответа (первые 100 символов)
+                    const responsePreview = request.response.length > 100 ? 
+                        request.response.substring(0, 100) + '...' : request.response;
+                    
+                    previewDiv.innerHTML = `
+                        <div class="prompt-preview">${promptPreview}</div>
+                        <div class="response-preview">${responsePreview}</div>
+                    `;
+                    
+                    historyDiv.appendChild(previewDiv);
+                });
+            } catch (error) {
+                console.error('Ошибка при загрузке истории:', error);
+                document.getElementById('history').innerHTML = '<p>Ошибка при загрузке истории запросов</p>';
+            }
+        }
+        
+        function showFullConversation(request) {
+            const historyDiv = document.getElementById('history');
+            
+            // Создаем полное представление диалога
+            const fullDiv = document.createElement('div');
+            fullDiv.className = 'conversation-full';
+            
+            // Создаем кнопку закрытия
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'close-btn';
+            closeBtn.textContent = 'Закрыть';
+            closeBtn.onclick = () => {
+                historyDiv.removeChild(fullDiv);
+                // Перезагружаем превью после закрытия
+                loadHistory();
+            };
+            
+            // Создаем контейнер для сообщения пользователя
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'message user-message';
+            userMessageDiv.innerHTML = `<strong>Вы:</strong><br>${formatText(request.prompt)}`;
+            
+            // Создаем контейнер для ответа ИИ
+            const aiMessageDiv = document.createElement('div');
+            aiMessageDiv.className = 'message ai-message';
+            aiMessageDiv.innerHTML = `<strong>Нейросеть:</strong><br>${formatText(request.response)}`;
+            
+            // Собираем все элементы
+            fullDiv.appendChild(closeBtn);
+            fullDiv.appendChild(userMessageDiv);
+            fullDiv.appendChild(aiMessageDiv);
+            
+            // Очищаем историю и показываем только этот диалог
+            historyDiv.innerHTML = '';
+            historyDiv.appendChild(fullDiv);
+        }
+        
+        function formatText(text) {
+            // Заменяем \n на <br> для переносов строк
+            let formattedText = text.replace(/\n/g, '<br>');
+            
+            // Обрабатываем выделение жирным шрифтом (**текст**)
+            formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<span class="bold-text">$1</span>');
+            
+            // Обрабатываем математические выражения в $...$
+            formattedText = formattedText.replace(/\$(.*?)\$/g, '<span class="math-expression">\$1</span>');
+            
+            return formattedText;
+        }
+        
+        // Загружаем историю при открытии страницы
+        window.onload = function() {
+            loadHistory();
+        };
+    </script>
+</body>
+</html>
