@@ -36,5 +36,5 @@ async def create_my_request(prompt: CreatePromtSchema, request: Request, session
         "prompt": prompt.prompt,
         "response": answer,
     }
-    await add_request_data(request_data, session=session)
+    await add_request_data(data=request_data, session=session)
     return {"message": "Request created successfully"}

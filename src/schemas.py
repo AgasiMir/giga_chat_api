@@ -23,6 +23,5 @@ class PromtSchema(BaseModel):
 class CreatePromtSchema(BaseModel):
     prompt: str = Field(
         description="The prompt to generate text from",
-        example="What is the capital of France?",
         min_length=1,
     )
