@@ -8,6 +8,8 @@ wheels/
 
 # Logs
 *.log
+*.log.gz
+*.log.zip
 logs/
 log/
 
@@ -20,6 +22,7 @@ htmlcov/
 .venv
 venv/
 env/
+.env
 
 # Database
 db.sqlite3

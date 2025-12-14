@@ -44,12 +44,12 @@ src/
 1. Клонируйте репозиторий:
 ```bash
 git clone <repository-url>
-cd ASH_FastAPI_Gemini
 ```
 
 2. Установите зависимости:
 ```bash
-pip install -e .
+pip install -r requirements.txt
+uv sync 
 ```
 
 3. Создайте файл `.env` на основе `.env.example` и заполните его:
@@ -59,11 +59,11 @@ GIGACHAT_API_KEY=ваш_api_ключ
 
 # Database
 DB_DRIVER=postgresql+asyncpg
-DB_USER=postgres
-DB_PASSWORD=postgres
+DB_USER=ваш_username
+DB_PASSWORD=ваш_password
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=ai_chat
+DB_NAME=ваш_db_name
 ```
 
 4. Запустите PostgreSQL через Docker:
@@ -81,10 +81,6 @@ alembic upgrade head
 uvicorn src.main:app --reload
 ```
 
-### Запуск с Docker Compose:
-```bash
-docker-compose up --build
-```
 
 ## 🧪 Тестирование
 
@@ -93,9 +89,6 @@ docker-compose up --build
 ```bash
 # Запуск тестов
 pytest
-
-# Запуск тестов с coverage
-pytest --cov=src --cov-report=html
 
 # Просмотр отчета о покрытии
 # Откройте htmlcov/index.html в браузере
@@ -127,10 +120,3 @@ pytest --cov=src --cov-report=html
 - [Pytest](https://docs.pytest.org/) - фреймворк для тестирования
 - [Docker](https://www.docker.com/) - контейнеризация приложения
 - [Alembic](https://alembic.sqlalchemy.org/) - миграции базы данных
-
-## 📈 Планы по улучшению
-
-- [ ] Добавить аутентификацию пользователей
-- [ ] Реализовать кэширование ответов
-- [ ] Добавить логирование
-- [ ] Расширить тестовое покрытие до 90%
